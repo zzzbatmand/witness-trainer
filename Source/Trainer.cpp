@@ -531,34 +531,29 @@ void Trainer::SetNoclipFlyDirection(Trainer::NoclipFlyDirection direction) {
 }
 
 void Trainer::Loop() {
-    static std::condition_variable cv;
-    static std::mutex              mut;
-    using delta = std::chrono::duration<std::int64_t, std::ratio<1, 60>>;
-    auto next = std::chrono::steady_clock::now() + delta{ 1 };
-    std::unique_lock<std::mutex> lk(mut);
-    while (true)
-    {
-        mut.unlock();
-        // Do stuff
+    while (true) {
+        // Get start time
+        auto start_time = std::chrono::steady_clock::now();
+        // Get end time
+        auto end_time = start_time + std::chrono::milliseconds(1);
 
+        // Do stuff
         // Handle Noclip.
         if (GetNoclip()) {
             if (_noclipDirection == Trainer::NoclipFlyDirection::UP) {
                 auto playerPos = GetCameraPos();
-                playerPos[2] += 0.0005f * GetNoclipSpeed();
+                playerPos[2] += 0.01f * GetNoclipSpeed();
                 SetCameraPos(playerPos);
             }
             else if (_noclipDirection == Trainer::NoclipFlyDirection::DOWN) {
                 auto playerPos = GetCameraPos();
-                playerPos[2] -= 0.0005f * GetNoclipSpeed();
+                playerPos[2] -= 0.01f * GetNoclipSpeed();
                 SetCameraPos(playerPos);
             }
         }
 
-        // Wait for the next 1/60 sec
-        mut.lock();
-        cv.wait_until(lk, next, [] {return false;});
-        next += delta{ 1 };
+        // Sleep if necessary
+        std::this_thread::sleep_until(end_time);
     }
 }
 
