@@ -35,7 +35,6 @@
 #define NOCLIP_FLY_DOWN     0x425
 #define NOCLIP_FLY_NONE     0x426
 
-
 // BUGS:
 // - Changing from old ver to new ver can set FOV = 0?
 
@@ -473,6 +472,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
         if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP) {
             lastCode = 0; // Cancel key repeat
 
+            // Handle KeyRelease event.
             auto foreground = GetForegroundWindow();
             if (g_hwnd == foreground || g_witnessProc->IsForeground()) {
                 auto p = (PKBDLLHOOKSTRUCT)lParam;

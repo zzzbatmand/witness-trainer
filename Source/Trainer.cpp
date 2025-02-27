@@ -157,7 +157,7 @@ std::shared_ptr<Trainer> Trainer::Create(const std::shared_ptr<Memory>& memory) 
     trainer->SetMainMenuColor(true); // Recolor the menu
     trainer->SetEPOverlayMinSize(true); // Prevent the solvability overlay from getting subpixel
 
-    // Start the loop.
+    // Loop thread.
     std::thread t([l_trainer = trainer] {
         l_trainer->Loop();
     });
