@@ -84,6 +84,7 @@ constexpr int32_t MASK_CONTROL = 0x0200;
 constexpr int32_t MASK_ALT     = 0x0400;
 constexpr int32_t MASK_WIN     = 0x0800;
 constexpr int32_t MASK_REPEAT  = 0x1000;
+constexpr int32_t MASK_RELEASE = 0x9900;
 std::map<int32_t, __int64> hotkeyCodes;
 std::unordered_set<int32_t> hotkeys; // Just the keys, for perf.
 
@@ -239,7 +240,6 @@ void LaunchSteamGame(const char* gameId, const char* arguments = "") {
     */
 }
 
-int32_t lastCode = 0;
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
         case WM_DESTROY:
@@ -460,30 +460,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) 
                 SetPosAndAngText(g_currentPos, g_savedCameraPos, g_savedCameraAng);
             }
         }
-
-        // Call the trainer loop.
-        trainer->Loop();
     });
     t.detach();
 
     return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
+int32_t lastCode = 0;
 LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     // Only steal hotkeys when we (or the game) are the active window.
     if (nCode == HC_ACTION) {
         if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP) {
             lastCode = 0; // Cancel key repeat
 
-
             auto foreground = GetForegroundWindow();
             if (g_hwnd == foreground || g_witnessProc->IsForeground()) {
                 auto p = (PKBDLLHOOKSTRUCT)lParam;
-                int32_t fullCode = p->vkCode | 0x9900;
-                if (hotkeys.find(fullCode) != hotkeys.end()) { // For perf, we look at just the keyboard key first (before consulting GetKeyState).
-                    auto search = hotkeyCodes.find(fullCode);
-                    if (search != std::end(hotkeyCodes)) PostMessage(g_hwnd, WM_COMMAND, search->second, NULL);
-                }
+                int32_t fullCode = p->vkCode | MASK_RELEASE;
+                auto search = hotkeyCodes.find(fullCode);
+                if (search != std::end(hotkeyCodes)) PostMessage(g_hwnd, WM_COMMAND, search->second, NULL);
             }
         } else if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) {
             auto foreground = GetForegroundWindow();
@@ -613,8 +608,8 @@ void CreateComponents() {
     // Create fly up/down hotkeys when using noclip.
     CreateHotkey(NOCLIP_FLY_UP, 'E');
     CreateHotkey(NOCLIP_FLY_DOWN, 'Q');
-    CreateHotkey(NOCLIP_FLY_NONE, 0x9900 | 'E');
-    CreateHotkey(NOCLIP_FLY_NONE, 0x9900 | 'Q');
+    CreateHotkey(NOCLIP_FLY_NONE, MASK_RELEASE | 'E');
+    CreateHotkey(NOCLIP_FLY_NONE, MASK_RELEASE | 'Q');
 
     CreateLabel(x, y + 4, 100, L"Noclip Speed");
     g_noclipSpeed = CreateText(100, y, 130, L"10", NOCLIP_SPEED);

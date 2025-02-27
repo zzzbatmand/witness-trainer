@@ -59,7 +59,6 @@ public:
     void SetNoclip(bool enable);
     void SetNoclipSpeed(float speed);
     void SetNoclipFlyDirection(NoclipFlyDirection direction);
-    void Loop();
     void SetPlayerPos(const std::vector<float>& pos);
     void SetCameraPos(const std::vector<float>& pos);
     void SetCameraAng(const std::vector<float>& ang);
@@ -103,6 +102,7 @@ private:
     __int64 _binkInfoData = 0; // all_bink_infos
     Trainer::NoclipFlyDirection _noclipDirection = Trainer::NoclipFlyDirection::NONE;
 
+
     // Entity offsets
     int _solvedTargetOffset = 0; // Entity_Machine_Panel.solved_t_target
     __int64 _recordPlayerUpdate = 0; // Entity_Record_Player.play_state
@@ -131,4 +131,5 @@ private:
         float position_b[3];
         int flags;
     };
+    void Loop();
 };

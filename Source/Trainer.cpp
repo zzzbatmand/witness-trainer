@@ -156,6 +156,12 @@ std::shared_ptr<Trainer> Trainer::Create(const std::shared_ptr<Memory>& memory) 
 
     trainer->SetMainMenuColor(true); // Recolor the menu
     trainer->SetEPOverlayMinSize(true); // Prevent the solvability overlay from getting subpixel
+
+    // Start the loop.
+    std::thread t([l_trainer = trainer] {
+        l_trainer->Loop();
+    });
+    t.detach();
     return trainer;
 }
 
@@ -525,17 +531,34 @@ void Trainer::SetNoclipFlyDirection(Trainer::NoclipFlyDirection direction) {
 }
 
 void Trainer::Loop() {
-    // Handle Noclip.
-    if (_noclipEnabled) {
-        if (_noclipDirection == Trainer::NoclipFlyDirection::UP) {
-            auto playerPos = GetCameraPos();
-            playerPos[2] += 0.0005f * _noclipSpeed;
-            SetCameraPos(playerPos);
-        } else if (_noclipDirection == Trainer::NoclipFlyDirection::DOWN) {
-            auto playerPos = GetCameraPos();
-            playerPos[2] -= 0.0005f * _noclipSpeed;
-            SetCameraPos(playerPos);
+    static std::condition_variable cv;
+    static std::mutex              mut;
+    using delta = std::chrono::duration<std::int64_t, std::ratio<1, 60>>;
+    auto next = std::chrono::steady_clock::now() + delta{ 1 };
+    std::unique_lock<std::mutex> lk(mut);
+    while (true)
+    {
+        mut.unlock();
+        // Do stuff
+
+        // Handle Noclip.
+        if (GetNoclip()) {
+            if (_noclipDirection == Trainer::NoclipFlyDirection::UP) {
+                auto playerPos = GetCameraPos();
+                playerPos[2] += 0.0005f * GetNoclipSpeed();
+                SetCameraPos(playerPos);
+            }
+            else if (_noclipDirection == Trainer::NoclipFlyDirection::DOWN) {
+                auto playerPos = GetCameraPos();
+                playerPos[2] -= 0.0005f * GetNoclipSpeed();
+                SetCameraPos(playerPos);
+            }
         }
+
+        // Wait for the next 1/60 sec
+        mut.lock();
+        cv.wait_until(lk, next, [] {return false;});
+        next += delta{ 1 };
     }
 }
 
