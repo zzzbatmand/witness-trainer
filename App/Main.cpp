@@ -35,6 +35,7 @@
 #define NOCLIP_FLY_DOWN     0x425
 #define NOCLIP_FLY_NONE     0x426
 
+
 // BUGS:
 // - Changing from old ver to new ver can set FOV = 0?
 
@@ -71,13 +72,12 @@ HWND g_hwnd;
 HINSTANCE g_hInstance;
 std::shared_ptr<Trainer> g_trainer;
 std::shared_ptr<Memory> g_witnessProc;
-HWND g_noclipSpeed, g_noclipUpDownSpeed, g_currentPos, g_savedPos, g_fovCurrent, g_sprintSpeed, g_activePanel, g_panelDist, g_panelName, g_panelState, g_panelPicture, g_activateGame, g_snapToPanel, g_snapToLabel, g_canSave, g_videoData;
+HWND g_noclipSpeed, g_currentPos, g_savedPos, g_fovCurrent, g_sprintSpeed, g_activePanel, g_panelDist, g_panelName, g_panelState, g_panelPicture, g_activateGame, g_snapToPanel, g_snapToLabel, g_canSave, g_videoData;
 
 std::vector<float> g_savedCameraPos = {0.0f, 0.0f, 0.0f};
 std::vector<float> g_savedCameraAng = {0.0f, 0.0f};
 int previousPanel = -1;
 std::vector<float> previousPanelStart;
-float noclipUpDownSpeed = 10;
 
 constexpr int32_t MASK_SHIFT   = 0x0100;
 constexpr int32_t MASK_CONTROL = 0x0200;
