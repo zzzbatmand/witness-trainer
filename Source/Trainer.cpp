@@ -520,6 +520,25 @@ void Trainer::SetNoclipSpeed(float speed) {
     _memory->WriteData<float>({_noclipSpeed}, {speed});
 }
 
+void Trainer::SetNoclipFlyDirection(Trainer::NoclipFlyDirection direction) {
+    _noclipDirection = direction;
+}
+
+void Trainer::Loop() {
+    // Handle Noclip.
+    if (_noclipEnabled) {
+        if (_noclipDirection == Trainer::NoclipFlyDirection::UP) {
+            auto playerPos = GetCameraPos();
+            playerPos[2] += 0.0005f * _noclipSpeed;
+            SetCameraPos(playerPos);
+        } else if (_noclipDirection == Trainer::NoclipFlyDirection::DOWN) {
+            auto playerPos = GetCameraPos();
+            playerPos[2] -= 0.0005f * _noclipSpeed;
+            SetCameraPos(playerPos);
+        }
+    }
+}
+
 void Trainer::SetPlayerPos(const std::vector<float>& pos) {
     _memory->WriteData<float>({_globals, 0x18, 0x1E465 * 8, 0x24}, pos);
 }
